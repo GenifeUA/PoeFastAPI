@@ -1,4 +1,5 @@
 import json
+from time import sleep
 
 import poe
 from starlette.responses import StreamingResponse
@@ -24,8 +25,11 @@ class POEAnswer:
     def normal_answer(self):
         client = poe.Client(self.token, proxy=self.proxy)
 
+        client.send_chat_break(self.poe_model)
+        sleep(3)
+
         reply = ""
-        for chunk in client.send_message(self.poe_model, self.messages, with_chat_break=True):
+        for chunk in client.send_message(self.poe_model, self.messages):
             # Записываем ответ по кусочкам в одну переменную
             reply += chunk["text_new"]
 
@@ -37,7 +41,10 @@ class POEAnswer:
     def stream_answer(self):
         client = poe.Client(self.token, proxy=self.proxy)
 
-        for chunk in client.send_message(self.poe_model, self.messages, with_chat_break=True):
+        client.send_chat_break(self.poe_model)
+        sleep(3)
+
+        for chunk in client.send_message(self.poe_model, self.messages):
             for i in chunk["text_new"]:
                 # Отдаём по кусочкам
                 data = {
