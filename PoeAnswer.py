@@ -5,9 +5,10 @@ from starlette.responses import StreamingResponse
 
 
 class POEAnswer:
-    def __init__(self, poe_model: str, token: str, messages: list, stream: bool):
+    def __init__(self, poe_model: str, token: str, proxy: str, messages: list, stream: bool):
         self.poe_model = poe_model
         self.token = token
+        self.proxy = proxy
         self.messages = messages
         self.stream = stream
 
@@ -21,7 +22,7 @@ class POEAnswer:
             return self.normal_answer()
 
     def normal_answer(self):
-        client = poe.Client(self.token)
+        client = poe.Client(self.token, proxy=self.proxy)
 
         reply = ""
         for chunk in client.send_message(self.poe_model, self.messages, with_chat_break=True):
@@ -34,7 +35,7 @@ class POEAnswer:
         }
 
     def stream_answer(self):
-        client = poe.Client(self.token)
+        client = poe.Client(self.token, proxy=self.proxy)
 
         for chunk in client.send_message(self.poe_model, self.messages, with_chat_break=True):
             for i in chunk["text_new"]:
