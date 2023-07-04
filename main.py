@@ -18,4 +18,4 @@ class ChatCompletionData(BaseModel):
 
 @app.post('/poe/generation')
 def completion(data: ChatCompletionData):
-    return POEAnswer(data.poe_model, data.token, data.proxy, data.messages, data.stream).get_poe_answer()
+    return POEAnswer(data.poe_model, data.token, data.proxy, data.messages, data.stream).get_response()

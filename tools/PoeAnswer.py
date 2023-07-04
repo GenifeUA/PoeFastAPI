@@ -28,7 +28,7 @@ class POEAnswer:
         self.messages = messages
         self.stream = stream
 
-    def get_poe_answer(self):
+    def get_response(self):
         logger.info(f"response for {self.poe_model} using {self.token} token with {self.proxy} proxy!")
 
         client = poe.Client(self.token, proxy=self.proxy)
