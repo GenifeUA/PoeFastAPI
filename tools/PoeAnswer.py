@@ -51,7 +51,6 @@ class POEAnswer:
     def stream_answer(self):
         client = poe.Client(self.token, proxy=self.proxy)
         try:
-
             for chunk in client.send_message(self.poe_model, self.messages):
                 for i in chunk["text_new"]:
                     # Отдаём по кусочкам
