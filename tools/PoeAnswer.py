@@ -29,38 +29,32 @@ class POEAnswer:
         self.stream = stream
 
     def get_poe_answer(self):
-        # В зависимости от типа запроса отдаём разные типы ответов - цельный и по частям.
         logger.info(f"response for {self.poe_model} using {self.token} token with {self.proxy} proxy!")
-        
+
         if self.stream:
             return StreamingResponse(self.stream_answer(), media_type="text/event-stream")
         else:
             return self.normal_answer()
 
     def normal_answer(self):
-        client = None
+        client = poe.Client(self.token, proxy=self.proxy)
         try:
-            client = poe.Client(self.token, proxy=self.proxy)
-
-            reply = ""
+            response = ""
             for chunk in client.send_message(self.poe_model, self.messages):
                 # Записываем ответ по кусочкам в одну переменную
-                reply += chunk["text_new"]
+                response += chunk["text_new"]
 
-            return Response(content=reply, media_type="text/plain")
+            return Response(content=response, media_type="text/plain")
         finally:
-            if client:
-                Thread(target=finish_response, args=(client, self.poe_model)).start()
+            Thread(target=finish_response, args=(client, self.poe_model)).start()
 
     def stream_answer(self):
-        client = None
+        client = poe.Client(self.token, proxy=self.proxy)
         try:
-            client = poe.Client(self.token, proxy=self.proxy)
 
             for chunk in client.send_message(self.poe_model, self.messages):
                 for i in chunk["text_new"]:
                     # Отдаём по кусочкам
                     yield i
         finally:
-            if client:
-                Thread(target=finish_response, args=(client, self.poe_model)).start()
+            Thread(target=finish_response, args=(client, self.poe_model)).start()
