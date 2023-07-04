@@ -31,13 +31,14 @@ class POEAnswer:
     def get_poe_answer(self):
         logger.info(f"response for {self.poe_model} using {self.token} token with {self.proxy} proxy!")
 
-        if self.stream:
-            return StreamingResponse(self.stream_answer(), media_type="text/event-stream")
-        else:
-            return self.normal_answer()
-
-    def normal_answer(self):
         client = poe.Client(self.token, proxy=self.proxy)
+
+        if self.stream:
+            return StreamingResponse(self.stream_response(client), media_type="text/event-stream")
+        else:
+            return self.default_response(client)
+
+    def default_response(self, client: poe.Client):
         try:
             response = ""
             for chunk in client.send_message(self.poe_model, self.messages):
@@ -48,8 +49,7 @@ class POEAnswer:
         finally:
             Thread(target=finish_response, args=(client, self.poe_model)).start()
 
-    def stream_answer(self):
-        client = poe.Client(self.token, proxy=self.proxy)
+    def stream_response(self, client: poe.Client):
         try:
             for chunk in client.send_message(self.poe_model, self.messages):
                 for i in chunk["text_new"]:
