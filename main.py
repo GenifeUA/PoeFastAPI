@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from PoeAnswer import POEAnswer
+from tools.PoeAnswer import POEAnswer
 
 app = FastAPI()
 

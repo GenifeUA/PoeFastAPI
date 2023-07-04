@@ -1,11 +1,10 @@
-import logging
 from threading import Thread
 from time import sleep
 
 import poe
 from starlette.responses import StreamingResponse
 
-logger = logging.getLogger()
+from tools.Logger import logger
 
 
 def finish_response(client: poe.Client, model):
@@ -31,6 +30,8 @@ class POEAnswer:
 
     def get_poe_answer(self):
         # В зависимости от типа запроса отдаём разные типы ответов - цельный и по частям.
+        logger.info(f"response for {self.poe_model} using {self.token} token with {self.proxy} proxy!")
+        
         if self.stream:
             return StreamingResponse(self.stream_answer(), media_type="text/event-stream")
         else:
