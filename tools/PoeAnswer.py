@@ -17,7 +17,7 @@ def finish_response(client: poe.Client, model):
         client.ws_error = False
         client.disconnect_ws()
     except RuntimeError as e:
-        logger.error(f"Error on disconnect_ws: {e}")
+        logger.error(f"Error on the websocket disconnect: {e}")
 
 
 class POEAnswer:
