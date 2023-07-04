@@ -1,8 +1,7 @@
 from typing import Optional
 
-import uvicorn as uvicorn
 from fastapi import FastAPI
-from pydantic import conlist, BaseModel
+from pydantic import BaseModel
 
 from PoeAnswer import POEAnswer
 
@@ -13,7 +12,7 @@ class ChatCompletionData(BaseModel):
     poe_model: str
     token: str
     proxy: Optional[str] = None
-    messages: conlist(dict, min_items=1)
+    messages: str
     stream: Optional[bool] = False
 
 
@@ -24,6 +23,3 @@ def completion(data: ChatCompletionData):
 
     answer = POEAnswer(poe_model, data.token, data.proxy, data.messages, data.stream)
     return answer.get_poe_answer()
-
-
-uvicorn.run(app)

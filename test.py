@@ -2,9 +2,9 @@ import requests
 
 messages = [{'role': 'user', 'content': "Hi!"}]
 
-data = {"poe_model": "beaver", "token": "", "proxy": "",
+data = {"poe_model": "beaver", "token": "RyLV55NGcOXfSqnQ56svMg%3D%3D", "proxy": "",
         "messages": messages, "stream": False}
 
-response = requests.post("http://127.0.0.1:8000/poe/generation", json=data)
+response = requests.post("http://127.0.0.1:11000/poe/generation", json=data)
 
-print(response.json())
+print(response.text)

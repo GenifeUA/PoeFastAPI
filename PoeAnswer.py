@@ -1,19 +1,33 @@
-import json
+import logging
+from threading import Thread
 from time import sleep
 
 import poe
 from starlette.responses import StreamingResponse
 
+logger = logging.getLogger()
+
+
+def finish_response(client: poe.Client, model):
+    sleep(5)
+    try:
+        client.send_chat_break(model)
+    except RuntimeError as e:
+        logger.error(f"Error on final chat break: {e}")
+    try:
+        client.ws_error = False
+        client.disconnect_ws()
+    except RuntimeError as e:
+        logger.error(f"Error on disconnect_ws: {e}")
+
 
 class POEAnswer:
-    def __init__(self, poe_model: str, token: str, proxy: str, messages: list, stream: bool):
+    def __init__(self, poe_model: str, token: str, proxy: str, messages: str, stream: bool):
         self.poe_model = poe_model
         self.token = token
         self.proxy = proxy
         self.messages = messages
         self.stream = stream
-
-        self.prompt_tokens = 0
 
     def get_poe_answer(self):
         # В зависимости от типа запроса отдаём разные типы ответов - цельный и по частям.
@@ -23,32 +37,29 @@ class POEAnswer:
             return self.normal_answer()
 
     def normal_answer(self):
-        client = poe.Client(self.token, proxy=self.proxy)
+        client = None
+        try:
+            client = poe.Client(self.token, proxy=self.proxy)
 
-        client.send_chat_break(self.poe_model)
-        sleep(3)
+            reply = ""
+            for chunk in client.send_message(self.poe_model, self.messages):
+                # Записываем ответ по кусочкам в одну переменную
+                reply += chunk["text_new"]
 
-        reply = ""
-        for chunk in client.send_message(self.poe_model, self.messages):
-            # Записываем ответ по кусочкам в одну переменную
-            reply += chunk["text_new"]
-
-        client.disconnect_ws()
-        return {
-            "text": reply
-        }
+            return reply
+        finally:
+            if client:
+                Thread(target=finish_response, args=(client, self.poe_model)).start()
 
     def stream_answer(self):
-        client = poe.Client(self.token, proxy=self.proxy)
+        client = None
+        try:
+            client = poe.Client(self.token, proxy=self.proxy)
 
-        client.send_chat_break(self.poe_model)
-        sleep(3)
-
-        for chunk in client.send_message(self.poe_model, self.messages):
-            for i in chunk["text_new"]:
-                # Отдаём по кусочкам
-                data = {
-                    "text": i
-                }
-                yield json.dumps(data) + "\n"
-        client.disconnect_ws()
+            for chunk in client.send_message(self.poe_model, self.messages):
+                for i in chunk["text_new"]:
+                    # Отдаём по кусочкам
+                    yield i
+        finally:
+            if client:
+                Thread(target=finish_response, args=(client, self.poe_model)).start()
