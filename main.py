@@ -18,8 +18,4 @@ class ChatCompletionData(BaseModel):
 
 @app.post('/poe/generation')
 def completion(data: ChatCompletionData):
-    # Получаем нейросеть для запроса
-    poe_model = data.poe_model
-
-    answer = POEAnswer(poe_model, data.token, data.proxy, data.messages, data.stream)
-    return answer.get_poe_answer()
+    return POEAnswer(data.poe_model, data.token, data.proxy, data.messages, data.stream).get_poe_answer()
