@@ -2,7 +2,7 @@ from threading import Thread
 from time import sleep
 
 import poe
-from starlette.responses import StreamingResponse
+from starlette.responses import StreamingResponse, Response
 
 from tools.Logger import logger
 
@@ -47,7 +47,7 @@ class POEAnswer:
                 # Записываем ответ по кусочкам в одну переменную
                 reply += chunk["text_new"]
 
-            return reply
+            return Response(content=reply, media_type="text/plain")
         finally:
             if client:
                 Thread(target=finish_response, args=(client, self.poe_model)).start()
