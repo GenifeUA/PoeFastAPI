@@ -25,7 +25,7 @@ class POEAnswer:
         self.poe_model = poe_model
         self.token = token
         self.proxy = proxy
-        self.messages = "systemOrder:----NEW_CONVERSATION----\n\n" + messages
+        self.messages = "System info: ----NEW_CONVERSATION----\n\n" + messages
         self.stream = stream
 
     def get_response(self):
