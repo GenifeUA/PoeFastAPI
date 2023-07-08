@@ -14,7 +14,6 @@ def finish_response(client: poe.Client, model):
     except RuntimeError as e:
         logger.error(f"Error on final chat break: {e}")
     try:
-        client.ws_error = False
         client.disconnect_ws()
     except RuntimeError as e:
         logger.error(f"Error on the websocket disconnect: {e}")
